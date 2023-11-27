@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Dance of Spheres: An Infinite Psychocosmic Screensaver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" sizes="16x16" href="icon_16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon_32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="icon_48x48.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="icon_64x64.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="icon_128x128.png">
+    <link rel="icon" type="image/png" sizes="152x152" href="icon_152x152.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon_192x192.png">
+    <link rel="icon" type="image/png" sizes="256x256" href="icon_256x256.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icon_152x152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icon_192x192.png">
+    <link rel="apple-touch-icon" sizes="256x256" href="icon_256x256.png">
+    <meta name="theme-color" content="#000000"> <!-- Adjust the theme color as needed -->
+    <link rel="shortcut icon" href="favicon.ico">
+    <meta property="og:image" content="preview.png"> <!-- Open Graph Image -->
+    <meta property="og:title" content="The Dance of Spheres: An Infinite Psychocosmic Screensaver">
+    <meta property="og:description" content="A dynamic and visually captivating psychocosmic experience through interactive particle animation.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://dance.franzai.com/"> <!-- Replace with your app's URL -->
+    <style>
+        body, canvas {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            background: #000; /* Add a background color */
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d');
+        
+        // Helper functions
+        const lerp = (a, b, t) => (1 - t) * a + t * b; // Linear interpolation
+        const getRandomColor = () => {
+            const h = Math.random() * 360;
+            return `hsl(${h}, 50%, 50%)`; // Use HSL for smooth color transitions
+        };
+        const getRandomSpeed = () => (Math.random() - 0.5) * 2;
+        const getRandomRadius = () => Math.random() * 35 + 5; // Larger radius for visibility
+
+        // Particle class
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.radius = getRandomRadius();
+                this.speedX = getRandomSpeed();
+                this.speedY = getRandomSpeed();
+                this.color = getRandomColor();
+            }
+
+            applyForce(forceX, forceY) {
+    this.speedX += forceX;
+    this.speedY += forceY;
+}
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            update() {
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+
+                // Interaction with other particles
+                particles.forEach(particle => {
+                    if (particle === this) return;
+                    const dx = particle.x - this.x;
+                    const dy = particle.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 1) distance = 1; // Prevent division by zero
+
+                    // Repulsion and attraction force
+                    const force = distance - 200; // Base distance for interaction
+                    const strength = -0.0005; // Strength of the force
+
+                    let forceX = (dx / distance) * force * strength;
+                    let forceY = (dy / distance) * force * strength;
+
+                    if (distance < this.radius + particle.radius) { // Collision
+                        forceX *= -1;
+                        forceY *= -1;
+                    } else { // Attraction
+                        forceX *= -1;
+                        forceY *= -1;
+                    }
+
+                    this.speedX += forceX;
+                    this.speedY += forceY;
+                });
+
+                this.speedX = lerp(this.speedX, getRandomSpeed(), 0.01);
+                this.speedY = lerp(this.speedY, getRandomSpeed(), 0.01);
+
+                this.x += this.speedX;
+                this.y += this.speedY;
+            }
+        }
+
+        let particles = Array.from({length: 100}, () => new Particle());
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Create a trail effect
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        
+
+        animate();
+let interactionStartTime;
+let longInteractionThreshold = 300; // Threshold for long interaction in milliseconds
+let interactionInterval;
+
+function applyForce(event) {
+    const mouseX = event.clientX || event.touches[0].clientX;
+    const mouseY = event.clientY || event.touches[0].clientY;
+
+    particles.forEach(particle => {
+        const dx = particle.x - mouseX;
+        const dy = particle.y - mouseY;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 1) distance = 1; // Prevent division by zero
+
+        // Repulsion force
+        const force = 1000; // Base force for interaction
+        const strength = -0.005; // Strength of the force
+
+        const forceX = (dx / distance) * force * strength;
+        const forceY = (dy / distance) * force * strength;
+
+        particle.applyForce(forceX, forceY);
+    });
+}
+
+function applyStrongForce(event) {
+    const mouseX = event.clientX || event.touches[0].clientX;
+    const mouseY = event.clientY || event.touches[0].clientY;
+
+    particles.forEach(particle => {
+        const dx = particle.x - mouseX;
+        const dy = particle.y - mouseY;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 1) distance = 1; // Prevent division by zero
+
+        // Stronger repulsion force
+        const force = 5000; // Base force for interaction
+        const strength = -0.005; // Strength of the force
+
+        const forceX = (dx / distance) * force * strength;
+        const forceY = (dy / distance) * force * strength;
+
+        particle.applyForce(forceX, forceY);
+    });
+}
+
+function startInteraction(event) {
+    interactionStartTime = Date.now();
+    applyForce(event);
+    interactionInterval = setInterval(() => applyStrongForce(event), longInteractionThreshold);
+}
+
+function endInteraction(event) {
+    clearInterval(interactionInterval);
+}
+
+canvas.addEventListener('mousedown', startInteraction);
+canvas.addEventListener('mouseup', endInteraction);
+canvas.addEventListener('touchstart', startInteraction);
+canvas.addEventListener('touchend', endInteraction);
+
+    </script>
+</body>
+</html>
