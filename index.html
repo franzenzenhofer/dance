@@ -144,49 +144,64 @@
         
 
         animate();
-let interactionActive = false;
+        let interactionActive = false;
+    let forceStrength = 0.005; // Initial strength of the force
 
-function applyForce(event) {
-    if (!interactionActive) return;
+    function applyForce(event) {
+        if (!interactionActive) return;
 
-    const points = event.touches ? Array.from(event.touches) : [{ clientX: event.clientX, clientY: event.clientY }];
+        const points = event.touches ? Array.from(event.touches) : [{ clientX: event.clientX, clientY: event.clientY }];
 
-    particles.forEach(particle => {
-        points.forEach(point => {
-            const dx = particle.x - point.clientX;
-            const dy = particle.y - point.clientY;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < 1) distance = 1; // Prevent division by zero
+        particles.forEach(particle => {
+            points.forEach(point => {
+                const dx = particle.x - point.clientX;
+                const dy = particle.y - point.clientY;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < 1) distance = 1; // Prevent division by zero
 
-            // Attraction force
-            const force = 1000; // Base force for interaction
-            const strength = 0.005; // Strength of the force
+                // Repulsion force
+                const force = 1000; // Base force for interaction
+                const strength = 0.005; // Strength of the force
 
-            const forceX = (dx / distance) * force * strength;
-            const forceY = (dy / distance) * force * strength;
+                const forceX = (dx / distance) * force * strength;
+                const forceY = (dy / distance) * force * strength;
 
-            particle.applyForce(forceX, forceY);
+                particle.applyForce(forceX, forceY);
+            });
         });
-    });
-}
+    }
 
-function startInteraction(event) {
-    event.preventDefault();
-    interactionActive = true;
-    applyForce(event);
-}
 
-function endInteraction(event) {
-    event.preventDefault();
-    interactionActive = false;
-}
 
-canvas.addEventListener('mousedown', startInteraction);
-canvas.addEventListener('mousemove', applyForce);
-canvas.addEventListener('mouseup', endInteraction);
-canvas.addEventListener('touchstart', startInteraction);
-canvas.addEventListener('touchmove', applyForce);
-canvas.addEventListener('touchend', endInteraction);
+    function interaction(event) {
+        if (interactionActive) {
+            applyForce(event);
+            forceStrength += 0.001; // Gradually increase the force strength
+            forceStrength = Math.min(forceStrength, 0.05); // Cap the force strength to avoid excessive speed
+        }
+    }
+    let forceInterval;
+
+    function startInteraction(event) {
+        event.preventDefault();
+        interactionActive = true;
+        forceStrength = 0.005; // Reset force strength on new interaction
+        applyForce(event);
+        forceInterval = setInterval(() => applyForce(event), 100); // Apply force every 100ms
+    }
+
+    function endInteraction(event) {
+        event.preventDefault();
+        interactionActive = false;
+        clearInterval(forceInterval); // Stop applying force
+    }
+
+    canvas.addEventListener('mousedown', startInteraction);
+    canvas.addEventListener('mousemove', interaction);
+    canvas.addEventListener('mouseup', endInteraction);
+    canvas.addEventListener('touchstart', startInteraction);
+    canvas.addEventListener('touchmove', interaction);
+    canvas.addEventListener('touchend', endInteraction);
     </script>
 </body>
 </html>
