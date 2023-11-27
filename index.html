@@ -131,67 +131,49 @@
         
 
         animate();
-let interactionStartTime;
-let longInteractionThreshold = 300; // Threshold for long interaction in milliseconds
-let interactionInterval;
+let interactionActive = false;
 
 function applyForce(event) {
-    const mouseX = event.clientX || event.touches[0].clientX;
-    const mouseY = event.clientY || event.touches[0].clientY;
+    if (!interactionActive) return;
+
+    const points = event.touches ? Array.from(event.touches) : [{ clientX: event.clientX, clientY: event.clientY }];
 
     particles.forEach(particle => {
-        const dx = particle.x - mouseX;
-        const dy = particle.y - mouseY;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 1) distance = 1; // Prevent division by zero
+        points.forEach(point => {
+            const dx = particle.x - point.clientX;
+            const dy = particle.y - point.clientY;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 1) distance = 1; // Prevent division by zero
 
-        // Repulsion force
-        const force = 1000; // Base force for interaction
-        const strength = -0.005; // Strength of the force
+            // Attraction force
+            const force = 1000; // Base force for interaction
+            const strength = 0.005; // Strength of the force
 
-        const forceX = (dx / distance) * force * strength;
-        const forceY = (dy / distance) * force * strength;
+            const forceX = (dx / distance) * force * strength;
+            const forceY = (dy / distance) * force * strength;
 
-        particle.applyForce(forceX, forceY);
-    });
-}
-
-function applyStrongForce(event) {
-    const mouseX = event.clientX || event.touches[0].clientX;
-    const mouseY = event.clientY || event.touches[0].clientY;
-
-    particles.forEach(particle => {
-        const dx = particle.x - mouseX;
-        const dy = particle.y - mouseY;
-        let distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < 1) distance = 1; // Prevent division by zero
-
-        // Stronger repulsion force
-        const force = 5000; // Base force for interaction
-        const strength = -0.005; // Strength of the force
-
-        const forceX = (dx / distance) * force * strength;
-        const forceY = (dy / distance) * force * strength;
-
-        particle.applyForce(forceX, forceY);
+            particle.applyForce(forceX, forceY);
+        });
     });
 }
 
 function startInteraction(event) {
-    interactionStartTime = Date.now();
+    event.preventDefault();
+    interactionActive = true;
     applyForce(event);
-    interactionInterval = setInterval(() => applyStrongForce(event), longInteractionThreshold);
 }
 
 function endInteraction(event) {
-    clearInterval(interactionInterval);
+    event.preventDefault();
+    interactionActive = false;
 }
 
 canvas.addEventListener('mousedown', startInteraction);
+canvas.addEventListener('mousemove', applyForce);
 canvas.addEventListener('mouseup', endInteraction);
 canvas.addEventListener('touchstart', startInteraction);
+canvas.addEventListener('touchmove', applyForce);
 canvas.addEventListener('touchend', endInteraction);
-
     </script>
 </body>
 </html>
