@@ -65,9 +65,17 @@
             }
 
             applyForce(forceX, forceY) {
-    this.speedX += forceX;
-    this.speedY += forceY;
-}
+        this.speedX += forceX;
+        this.speedY += forceY;
+
+        // Clamp the speed to a maximum value
+        const maxSpeed = 10; // Set the maximum speed as desired
+        const speed = Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY);
+        if (speed > maxSpeed) {
+            this.speedX *= maxSpeed / speed;
+            this.speedY *= maxSpeed / speed;
+        }
+    }
 
             draw() {
                 ctx.beginPath();
