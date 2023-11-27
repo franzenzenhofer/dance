@@ -47,7 +47,7 @@
             return `hsl(${h}, 50%, 50%)`; // Use HSL for smooth color transitions
         };
         const getRandomSpeed = () => (Math.random() - 0.5) * 2;
-        const getRandomRadius = () => Math.random() * 35 + 5; // Larger radius for visibility
+        const getRandomRadius = () => Math.random() * 25 + 5; // Larger radius for visibility
 
         // Particle class
         class Particle {
@@ -116,7 +116,7 @@
             }
         }
 
-        let particles = Array.from({length: 100}, () => new Particle());
+        let particles = Array.from({length: 50}, () => new Particle());
 
         function animate() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Create a trail effect
