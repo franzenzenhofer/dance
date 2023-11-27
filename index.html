@@ -86,9 +86,14 @@
             }
 
             update() {
-                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-
+                if (this.x < 0 || this.x > canvas.width) {
+                    const forceX = (canvas.width / 2 - this.x) * 0.1; // Increase this factor to make the force stronger
+                    this.applyForce(forceX, 0);
+                }
+                if (this.y < 0 || this.y > canvas.height) {
+                    const forceY = (canvas.height / 2 - this.y) * 0.1; // Increase this factor to make the force stronger
+                    this.applyForce(0, forceY);
+                }
                 // Interaction with other particles
                 particles.forEach(particle => {
                     if (particle === this) return;
