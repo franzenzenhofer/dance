@@ -225,19 +225,33 @@
     }
 
     let lastTap = 0;
-canvas.addEventListener('touchend', function(event) {
-    const currentTime = Date.now();
-    const tapLength = currentTime - lastTap;
-    if (tapLength < 500 && tapLength > 0) {
-        event.preventDefault();
-        const touchX = event.changedTouches[0].clientX;
-        const touchY = event.changedTouches[0].clientY;
-        particles.push(new Particle(getRandomRadius(8, 22), touchX, touchY));
-    } else {
-        endInteraction(event);
-    }
-    lastTap = currentTime;
-});
+    canvas.addEventListener('touchend', function(event) {
+        const currentTime = Date.now();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 500 && tapLength > 0) {
+            event.preventDefault();
+            const touchX = event.changedTouches[0].clientX;
+            const touchY = event.changedTouches[0].clientY;
+            let tappedParticleIndex = -1;
+            for (let i = 0; i < particles.length; i++) {
+                const dx = touchX - particles[i].x;
+                const dy = touchY - particles[i].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < particles[i].radius) {
+                    tappedParticleIndex = i;
+                    break;
+                }
+            }
+            if (tappedParticleIndex !== -1) {
+                particles.splice(tappedParticleIndex, 1);
+            } else {
+                particles.push(new Particle(getRandomRadius(8, 22), touchX, touchY));
+            }
+        } else {
+            endInteraction(event);
+        }
+        lastTap = currentTime;
+    });
 
 
     canvas.addEventListener('mousedown', startInteraction);
