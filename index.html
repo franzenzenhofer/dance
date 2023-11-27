@@ -47,22 +47,27 @@
             return `hsl(${h}, 50%, 50%)`; // Use HSL for smooth color transitions
         };
         const getRandomSpeed = () => (Math.random() - 0.5) * 2;
-        const getRandomRadius = () => Math.random() * 25 + 5; // Larger radius for visibility
+        const getRandomRadius = (min, max) => Math.random() * (max - min) + min;
 
+      
         // Particle class
         class Particle {
-            constructor() {
-                this.reset();
-            }
+    constructor(radius, x, y) {
+        this.radius = radius;
+        this.x = x || Math.random() * canvas.width;
+        this.y = y || Math.random() * canvas.height;
+        this.speedX = getRandomSpeed();
+        this.speedY = getRandomSpeed();
+        this.color = getRandomColor();
+    }
 
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.radius = getRandomRadius();
-                this.speedX = getRandomSpeed();
-                this.speedY = getRandomSpeed();
-                this.color = getRandomColor();
-            }
+    reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.speedX = getRandomSpeed();
+        this.speedY = getRandomSpeed();
+        this.color = getRandomColor();
+    }
 
             applyForce(forceX, forceY) {
         this.speedX += forceX;
@@ -129,7 +134,8 @@
             }
         }
 
-        let particles = Array.from({length: 50}, () => new Particle());
+        let particles = Array.from({length: 4}, () => new Particle(getRandomRadius(5, 8))); // Half of the particles up to 8 pixels
+        particles = particles.concat(Array.from({length: 4}, () => new Particle(getRandomRadius(9, 20)))); // Other half between 18 and 25 pixels
 
         function animate() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; // Create a trail effect
@@ -195,6 +201,22 @@
         interactionActive = false;
         clearInterval(forceInterval); // Stop applying force
     }
+
+    let lastTap = 0;
+canvas.addEventListener('touchend', function(event) {
+    const currentTime = Date.now();
+    const tapLength = currentTime - lastTap;
+    if (tapLength < 300 && tapLength > 0) {
+        event.preventDefault();
+        const touchX = event.changedTouches[0].clientX;
+        const touchY = event.changedTouches[0].clientY;
+        particles.push(new Particle(getRandomRadius(8, 20), touchX, touchY));
+    } else {
+        endInteraction(event);
+    }
+    lastTap = currentTime;
+});
+
 
     canvas.addEventListener('mousedown', startInteraction);
     canvas.addEventListener('mousemove', interaction);
