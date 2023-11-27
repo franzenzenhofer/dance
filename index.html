@@ -39,7 +39,7 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         const ctx = canvas.getContext('2d');
-        
+        ctx.imageSmoothingEnabled = true;        
         // Helper functions
         const lerp = (a, b, t) => (1 - t) * a + t * b; // Linear interpolation
         const getRandomColor = () => {
