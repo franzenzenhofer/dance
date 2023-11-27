@@ -39,7 +39,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 4vw; /* Relative to the width of the viewport */
+            font-size: 6vw; /* Relative to the width of the viewport */
             font-family: 'Courier New', monospace; /* Use a web-safe font */
             color: white;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -66,7 +66,7 @@
         const lerp = (a, b, t) => (1 - t) * a + t * b; // Linear interpolation
         const getRandomColor = () => {
             const h = Math.random() * 360;
-            return `hsl(${h}, 50%, 50%)`; // Use HSL for smooth color transitions
+            return `hsl(${h}, 100%, 50%)`; // Use HSL for neon colors
         };
         const getRandomSpeed = () => (Math.random() - 0.5) * 2;
         const getRandomRadius = (min, max) => Math.random() * (max - min) + min;
@@ -232,7 +232,7 @@ canvas.addEventListener('touchend', function(event) {
         event.preventDefault();
         const touchX = event.changedTouches[0].clientX;
         const touchY = event.changedTouches[0].clientY;
-        particles.push(new Particle(getRandomRadius(8, 20), touchX, touchY));
+        particles.push(new Particle(getRandomRadius(8, 22), touchX, touchY));
     } else {
         endInteraction(event);
     }
