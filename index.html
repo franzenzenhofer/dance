@@ -30,10 +30,32 @@
             height: 100%;
             background: #000; /* Add a background color */
         }
+
+        #overlay {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4vw; /* Relative to the width of the viewport */
+            font-family: 'Courier New', monospace; /* Use a web-safe font */
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: fadeOut 3s forwards;
+            opacity: 1;
+            width: 100%; /* Make the overlay fit the width of the screen */
+        }
+
+@keyframes fadeOut {
+    to { opacity: 0; }
+}
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
+    <div id="overlay">Double tap to create.</div>
     <script>
         const canvas = document.getElementById('gameCanvas');
         canvas.width = window.innerWidth;
@@ -206,7 +228,7 @@
 canvas.addEventListener('touchend', function(event) {
     const currentTime = Date.now();
     const tapLength = currentTime - lastTap;
-    if (tapLength < 300 && tapLength > 0) {
+    if (tapLength < 500 && tapLength > 0) {
         event.preventDefault();
         const touchX = event.changedTouches[0].clientX;
         const touchY = event.changedTouches[0].clientY;
@@ -224,6 +246,16 @@ canvas.addEventListener('touchend', function(event) {
     canvas.addEventListener('touchstart', startInteraction);
     canvas.addEventListener('touchmove', interaction);
     canvas.addEventListener('touchend', endInteraction);
+
+
+    function handleFirstTouch(event) {
+        const overlay = document.getElementById('overlay');
+        if (overlay) overlay.remove();
+        canvas.removeEventListener('touchstart', handleFirstTouch);
+        // Rest of your code
+    }
+
+    canvas.addEventListener('touchstart', handleFirstTouch);
     </script>
 </body>
 </html>
