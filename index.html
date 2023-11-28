@@ -61,8 +61,24 @@
     <div id="overlay">Double tap to create.</div>
     <script>
         const canvas = document.getElementById('gameCanvas');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        function resizeAndStyleCanvas() {
+    // Adjust canvas dimensions
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Set a maximum height based on the viewport height
+    const viewportHeight = window.innerHeight * 0.9999; // 98% of viewport height
+    canvas.style.height = `${viewportHeight}px`;
+
+    // Reinitialize or adjust your canvas elements if needed
+    // (e.g., repositioning elements, redrawing, etc.)
+}
+
+// Attach the function to the window's resize event
+window.addEventListener('resize', resizeAndStyleCanvas);
+
+// Call the function once to set the initial size and style
+resizeAndStyleCanvas();
         const ctx = canvas.getContext('2d');
         ctx.imageSmoothingEnabled = true;        
         // Helper functions
