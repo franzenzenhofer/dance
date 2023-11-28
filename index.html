@@ -213,10 +213,9 @@ resizeAndStyleCanvas();
     this.x += this.speedX + this.spinX;
     this.y += this.speedY + this.spinY;
 
-
-     // Ensure the particle's center stays within the canvas
-     this.x = Math.max(Math.min(this.x, canvas.width - this.radius), this.radius);
-     this.y = Math.max(Math.min(this.y, canvas.height - this.radius), this.radius);
+// Ensure the particle's center stays within the canvas
+this.x = Math.max(Math.min(this.x, canvas.width), 0);
+    this.y = Math.max(Math.min(this.y, canvas.height), 0);
 }
 
         }
