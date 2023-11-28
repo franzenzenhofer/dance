@@ -125,11 +125,11 @@
 
     // If the particle is near the edge of the canvas, apply a force to push it back
     if (this.x < -buffer || this.x > canvas.width + buffer) {
-        const forceX = (canvas.width / 2 - this.x) * 0.1;
+        const forceX = (canvas.width / 2 - this.x) * 0.01;
         this.applyForce(forceX, 0);
     }
     if (this.y < -buffer || this.y > canvas.height + buffer) {
-        const forceY = (canvas.height / 2 - this.y) * 0.1;
+        const forceY = (canvas.height / 2 - this.y) * 0.01;
         this.applyForce(0, forceY);
     }
 
