@@ -424,10 +424,35 @@ canvas.addEventListener('touchcancel', endInteraction);
 
 
 canvas.addEventListener('touchstart', function(event) {
-    clearInterval(interactionTimeout); // Clear the timeout to prevent new particle creation
-        clearInterval(addParticleTimeout); // Clear the timeout to prevent new particle creation
+   // clearInterval(interactionTimeout); // Clear the timeout to prevent new particle creation
+   //     clearInterval(addParticleTimeout); // Clear the timeout to prevent new particle creation
+        clear([interactionTimeout, addParticleTimeout]);
     gravitationalCenter = { x: event.touches[0].clientX, y: event.touches[0].clientY };
 });
+
+// Listen for the deviceorientation event
+window.addEventListener('deviceorientation', function(event) {
+    try {
+        clear([interactionTimeout, addParticleTimeout]);
+        // event.alpha is the compass direction the device is facing in degrees
+        // event.beta is the device front-to-back tilt in degrees (-180 to 180)
+        // event.gamma is the device left-to-right tilt in degrees (-90 to 90)
+
+        // Map the tilt to the canvas dimensions
+        const tiltX = map(event.gamma, -90, 90, 0, canvas.width);
+        const tiltY = map(event.beta, -180, 180, 0, canvas.height);
+
+        // Update the gravitational center
+        gravitationalCenter = { x: tiltX, y: tiltY };
+    } catch (error) {
+        console.error('An error occurred:', error);
+    }
+});
+
+// Helper function to map a value from one range to another
+function map(value, in_min, in_max, out_min, out_max) {
+    return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 
     function handleFirstTouch(event) {
