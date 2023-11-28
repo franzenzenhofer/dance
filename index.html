@@ -26,11 +26,12 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            width: 100%;
-            height: 100%;
+            width: 100vw; /* 100% of the viewport width */
+            height: 100vh; /* 100% of the viewport height */
             background: #000; /* Add a background color */
-        }
+            user-select: none; /* Prevent selection */
 
+        }
         #overlay {
             display: flex;
             justify-content: center;
@@ -46,6 +47,8 @@
             animation: fadeOut 3s forwards;
             opacity: 1;
             width: 100%; /* Make the overlay fit the width of the screen */
+            user-select: none; /* Prevent selection */
+
         }
 
 @keyframes fadeOut {
@@ -70,7 +73,7 @@
         };
         const getRandomSpeed = () => (Math.random() - 0.5) * 2;
         const getRandomRadius = (min, max) => Math.random() * (max - min) + min;
-
+        let gravitationalCenter = { x: canvas.width / 2, y: canvas.height / 2 };
       
         // Particle class
         class Particle {
@@ -81,6 +84,10 @@
         this.speedX = getRandomSpeed();
         this.speedY = getRandomSpeed();
         this.color = getRandomColor();
+        this.spinX = Math.random() * 4 - 2; // Spin rate for x between -2 and 2
+        this.spinY = Math.random() * 4 - 2; // Spin rate for y between -2 and 2
+        this.repulsionStrength = Math.random() * 0.001; // Repulsion strength between 0 and 0.001
+        this.attractionStrength = Math.random() * 0.002; // Attraction strength between 0 and 0.002
     }
 
     reset() {
@@ -113,47 +120,84 @@
             }
 
             update() {
-                if (this.x < 0 || this.x > canvas.width) {
-                    const forceX = (canvas.width / 2 - this.x) * 0.1; // Increase this factor to make the force stronger
-                    this.applyForce(forceX, 0);
-                }
-                if (this.y < 0 || this.y > canvas.height) {
-                    const forceY = (canvas.height / 2 - this.y) * 0.1; // Increase this factor to make the force stronger
-                    this.applyForce(0, forceY);
-                }
-                // Interaction with other particles
-                particles.forEach(particle => {
-                    if (particle === this) return;
-                    const dx = particle.x - this.x;
-                    const dy = particle.y - this.y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < 1) distance = 1; // Prevent division by zero
+    // Buffer zone for edge repulsion
+    const buffer = -10;
 
-                    // Repulsion and attraction force
-                    const force = distance - 200; // Base distance for interaction
-                    const strength = -0.0005; // Strength of the force
+    // If the particle is near the edge of the canvas, apply a force to push it back
+    if (this.x < -buffer || this.x > canvas.width + buffer) {
+        const forceX = (canvas.width / 2 - this.x) * 0.1;
+        this.applyForce(forceX, 0);
+    }
+    if (this.y < -buffer || this.y > canvas.height + buffer) {
+        const forceY = (canvas.height / 2 - this.y) * 0.1;
+        this.applyForce(0, forceY);
+    }
 
-                    let forceX = (dx / distance) * force * strength;
-                    let forceY = (dy / distance) * force * strength;
+    // Interaction with other particles
+    particles.forEach(particle => {
+        if (particle === this) return; // Skip self
 
-                    if (distance < this.radius + particle.radius) { // Collision
-                        forceX *= -1;
-                        forceY *= -1;
-                    } else { // Attraction
-                        forceX *= -1;
-                        forceY *= -1;
-                    }
+        // Calculate distance to other particle
+        const dx = particle.x - this.x;
+        const dy = particle.y - this.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < 1) distance = 1; // Prevent division by zero
 
-                    this.speedX += forceX;
-                    this.speedY += forceY;
-                });
+        // Calculate repulsion and attraction force
+        const force = distance - 200; // Base distance for interaction
 
-                this.speedX = lerp(this.speedX, getRandomSpeed(), 0.01);
-                this.speedY = lerp(this.speedY, getRandomSpeed(), 0.01);
+        let forceX, forceY;
+        if (distance < this.radius + particle.radius) { // If particles are colliding
+            // Apply repulsion force
+            forceX = (dx / distance) * force * this.repulsionStrength;
+            forceY = (dy / distance) * force * this.repulsionStrength;
+        } else { // If particles are not colliding
+            // Apply attraction force
+            forceX = (dx / distance) * force * this.attractionStrength;
+            forceY = (dy / distance) * force * this.attractionStrength;
+        }
 
-                this.x += this.speedX;
-                this.y += this.speedY;
-            }
+        // Apply the calculated force to the particle's speed
+        this.speedX += forceX;
+        this.speedY += forceY;
+    });
+
+    // Gradually change the particle's speed to a random speed
+    this.speedX = lerp(this.speedX, getRandomSpeed(), 0.01);
+    this.speedY = lerp(this.speedY, getRandomSpeed(), 0.01);
+
+    // Gravitational force
+
+     // Gravitational force
+
+     const dx = gravitationalCenter.x - this.x;
+    const dy = gravitationalCenter.y - this.y;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+
+    // Ensure distance is not zero to avoid division by zero
+    if (distance < 1) distance = 1;
+
+    const gravitationalForce = 0.1; // Strength of the gravitational force
+    const forceX = (dx / distance) * gravitationalForce;
+    const forceY = (dy / distance) * gravitationalForce;
+
+    // Optional: Limit the magnitude of the force
+    const maxForce = 5;
+    const forceMagnitude = Math.sqrt(forceX * forceX + forceY * forceY);
+    if (forceMagnitude > maxForce) {
+        const scale = maxForce / forceMagnitude;
+        forceX *= scale;
+        forceY *= scale;
+    }
+
+    this.applyForce(forceX, forceY);
+
+
+    // Update the particle's position based on its speed and spin
+    this.x += this.speedX + this.spinX;
+    this.y += this.speedY + this.spinY;
+}
+
         }
 
         let particles = Array.from({length: 4}, () => new Particle(getRandomRadius(5, 8))); // Half of the particles up to 8 pixels
@@ -229,19 +273,27 @@
 
     function createOrDeleteParticle(x, y) {
         let tappedParticleIndex = -1;
+        // Loop through all particles to find if a particle has been tapped/clicked
         for (let i = 0; i < particles.length; i++) {
             const dx = x - particles[i].x;
             const dy = y - particles[i].y;
             const distance = Math.sqrt(dx * dx + dy * dy);
+            // If the distance is less than the particle's radius, a particle has been tapped/clicked
             if (distance < particles[i].radius) {
                 tappedParticleIndex = i;
                 break;
             }
         }
+        // If a particle was tapped/clicked, remove it from the particles array
         if (tappedParticleIndex !== -1) {
             particles.splice(tappedParticleIndex, 1);
+           // console.log('Particle deleted at index:', tappedParticleIndex); // Log the deletion
         } else {
-            particles.push(new Particle(getRandomRadius(8, 22), x, y));
+            // If no particle was tapped/clicked, create a new particle at the tapped/clicked location
+           // console.log(particles.length);
+           particles.push(new Particle(getRandomRadius(8, 22), x, y));
+           //console.log(particles.length);
+           // console.log('Particle created at:', x, y); // Log the creation
         }
     }
 
@@ -273,15 +325,26 @@
     canvas.addEventListener('touchmove', interaction);
     canvas.addEventListener('touchend', endInteraction);
 
+ canvas.addEventListener('mousemove', function(event) {
+    gravitationalCenter = { x: event.clientX, y: event.clientY };
+}); 
+
+
+canvas.addEventListener('touchstart', function(event) {
+    gravitationalCenter = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+});
+
 
     function handleFirstTouch(event) {
         const overlay = document.getElementById('overlay');
         if (overlay) overlay.remove();
         canvas.removeEventListener('touchstart', handleFirstTouch);
+        canvas.removeEventListener('mousedown', handleFirstTouch);
         // Rest of your code
     }
 
     canvas.addEventListener('touchstart', handleFirstTouch);
+    canvas.addEventListener('mousedown', handleFirstTouch);
     </script>
 </body>
 </html>
