@@ -284,15 +284,41 @@ let interactionTimeout;
     }
 
     function endInteraction(event) {
-        event.preventDefault();
+        if(event)
+        {
+         event.preventDefault();
+    }
         interactionActive = false;
         clearInterval(forceInterval); // Stop applying force
-
+//console.log('Interaction ended');
             // Set a timeout to add a new particle if there's no interaction for 5 seconds
     interactionTimeout = setTimeout(function addParticle() {
         if (particles.length < 240) {
-            particles.push(new Particle(getRandomRadius(5, 24)));
-            console.log('Particle created due to inactivity');
+           // Generate a random position outside the viewport
+let x, y;
+const side = Math.floor(Math.random() * 4); // Randomly choose a side (0: top, 1: right, 2: bottom, 3: left)
+switch (side) {
+    case 0: // Top
+        x = Math.random() * canvas.width;
+        y = -24; // Outside the top edge
+        break;
+    case 1: // Right
+        x = canvas.width + 24; // Outside the right edge
+        y = Math.random() * canvas.height;
+        break;
+    case 2: // Bottom
+        x = Math.random() * canvas.width;
+        y = canvas.height + 24; // Outside the bottom edge
+        break;
+    case 3: // Left
+        x = -24; // Outside the left edge
+        y = Math.random() * canvas.height;
+        break;
+}
+
+// Create the new particle
+particles.push(new Particle(getRandomRadius(5, 24), x, y));
+           // console.log('Particle created due to inactivity');
         }
         //additonal the gravity center is set to a random location with the canvas
         gravitationalCenter = { x: Math.random() * canvas.width, y: Math.random() * canvas.height };
@@ -384,7 +410,6 @@ canvas.addEventListener('touchstart', function(event) {
     document.body.addEventListener('touchstart', handleFirstTouch);
     document.body.addEventListener('mousedown', handleFirstTouch);
     //end interaction is called at least once after verything is loaded with an event
-    document.body.addEventListener('DomContentLoaded', endInteraction);
-    </script>
+    endInteraction(null);   </script>
 </body>
 </html>
