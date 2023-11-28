@@ -263,7 +263,7 @@ this.x = Math.max(Math.min(this.x, canvas.width), 0);
         });
     }
 
-
+let interactionTimeout;
 
     function interaction(event) {
         if (interactionActive) {
@@ -271,6 +271,7 @@ this.x = Math.max(Math.min(this.x, canvas.width), 0);
             forceStrength += 0.001; // Gradually increase the force strength
             forceStrength = Math.min(forceStrength, 0.05); // Cap the force strength to avoid excessive speed
         }
+        clearTimeout(interactionTimeout); // Clear the timeout when an interaction starts
     }
     let forceInterval;
 
@@ -286,6 +287,18 @@ this.x = Math.max(Math.min(this.x, canvas.width), 0);
         event.preventDefault();
         interactionActive = false;
         clearInterval(forceInterval); // Stop applying force
+
+            // Set a timeout to add a new particle if there's no interaction for 5 seconds
+    interactionTimeout = setTimeout(function addParticle() {
+        if (particles.length < 240) {
+            particles.push(new Particle(getRandomRadius(5, 24)));
+            console.log('Particle created due to inactivity');
+        }
+        //additonal the gravity center is set to a random location with the canvas
+        gravitationalCenter = { x: Math.random() * canvas.width, y: Math.random() * canvas.height };
+        // Set the timeout again to add another particle in 1 second if there's still no interaction
+        interactionTimeout = setTimeout(addParticle, Math.random() * (30000 - 5000) + 5000);
+    }, 15000);
     }
 
     let lastTap = 0;
@@ -340,10 +353,15 @@ this.x = Math.max(Math.min(this.x, canvas.width), 0);
 
     canvas.addEventListener('mousedown', startInteraction);
     canvas.addEventListener('mousemove', interaction);
-    canvas.addEventListener('mouseup', endInteraction);
+
     canvas.addEventListener('touchstart', startInteraction);
     canvas.addEventListener('touchmove', interaction);
-    canvas.addEventListener('touchend', endInteraction);
+
+    canvas.addEventListener('mouseup', endInteraction);
+canvas.addEventListener('mouseleave', endInteraction);
+canvas.addEventListener('touchend', endInteraction);
+canvas.addEventListener('touchcancel', endInteraction);
+
 
  canvas.addEventListener('mousemove', function(event) {
     gravitationalCenter = { x: event.clientX, y: event.clientY };
@@ -363,8 +381,10 @@ canvas.addEventListener('touchstart', function(event) {
         // Rest of your code
     }
 
-    canvas.addEventListener('touchstart', handleFirstTouch);
-    canvas.addEventListener('mousedown', handleFirstTouch);
+    document.body.addEventListener('touchstart', handleFirstTouch);
+    document.body.addEventListener('mousedown', handleFirstTouch);
+    //end interaction is called at least once after verything is loaded with an event
+    document.body.addEventListener('DomContentLoaded', endInteraction);
     </script>
 </body>
 </html>
