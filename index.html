@@ -225,6 +225,26 @@
     }
 
     let lastTap = 0;
+
+
+    function createOrDeleteParticle(x, y) {
+        let tappedParticleIndex = -1;
+        for (let i = 0; i < particles.length; i++) {
+            const dx = x - particles[i].x;
+            const dy = y - particles[i].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < particles[i].radius) {
+                tappedParticleIndex = i;
+                break;
+            }
+        }
+        if (tappedParticleIndex !== -1) {
+            particles.splice(tappedParticleIndex, 1);
+        } else {
+            particles.push(new Particle(getRandomRadius(8, 22), x, y));
+        }
+    }
+
     canvas.addEventListener('touchend', function(event) {
         const currentTime = Date.now();
         const tapLength = currentTime - lastTap;
@@ -232,25 +252,17 @@
             event.preventDefault();
             const touchX = event.changedTouches[0].clientX;
             const touchY = event.changedTouches[0].clientY;
-            let tappedParticleIndex = -1;
-            for (let i = 0; i < particles.length; i++) {
-                const dx = touchX - particles[i].x;
-                const dy = touchY - particles[i].y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance < particles[i].radius) {
-                    tappedParticleIndex = i;
-                    break;
-                }
-            }
-            if (tappedParticleIndex !== -1) {
-                particles.splice(tappedParticleIndex, 1);
-            } else {
-                particles.push(new Particle(getRandomRadius(8, 22), touchX, touchY));
-            }
+            createOrDeleteParticle(touchX, touchY);
         } else {
             endInteraction(event);
         }
         lastTap = currentTime;
+    });
+
+    canvas.addEventListener('dblclick', function(event) {
+        const clickX = event.clientX;
+        const clickY = event.clientY;
+        createOrDeleteParticle(clickX, clickY);
     });
 
 
