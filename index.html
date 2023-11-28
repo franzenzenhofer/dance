@@ -263,25 +263,31 @@ this.x = Math.max(Math.min(this.x, canvas.width), 0);
         });
     }
 
-let interactionTimeout;
+    let interactionTimeout;
+let addParticleTimeout;
 
-    function interaction(event) {
-        if (interactionActive) {
-            applyForce(event);
-            forceStrength += 0.001; // Gradually increase the force strength
-            forceStrength = Math.min(forceStrength, 0.05); // Cap the force strength to avoid excessive speed
-        }
-        clearTimeout(interactionTimeout); // Clear the timeout when an interaction starts
+// interaction function
+function interaction(event) {
+    if (interactionActive) {
+        applyForce(event);
+        forceStrength += 0.001; // Gradually increase the force strength
+        forceStrength = Math.min(forceStrength, 0.05); // Cap the force strength
     }
+    clearTimeout(interactionTimeout); // Clear the timeout to prevent new particle creation
+    clearTimeout(addParticleTimeout); // Clear the timeout to prevent new particle creation
+}
     let forceInterval;
 
-    function startInteraction(event) {
-        event.preventDefault();
-        interactionActive = true;
-        forceStrength = 0.005; // Reset force strength on new interaction
-        applyForce(event);
-        forceInterval = setInterval(() => applyForce(event), 100); // Apply force every 100ms
-    }
+// startInteraction function
+function startInteraction(event) {
+    event.preventDefault();
+    interactionActive = true;
+    forceStrength = 0.005; // Reset force strength on new interaction
+    applyForce(event);
+    forceInterval = setInterval(() => applyForce(event), 100); // Apply force every 100ms
+    clearTimeout(interactionTimeout); // Clear the timeout to prevent new particle creation
+    clearTimeout(addParticleTimeout); // Clear the timeout to prevent new particle creation
+}
 
     function endInteraction(event) {
         if(event)
@@ -290,9 +296,11 @@ let interactionTimeout;
     }
         interactionActive = false;
         clearInterval(forceInterval); // Stop applying force
+        clearInterval(interactionTimeout); // Clear the timeout to prevent new particle creation
+        clearInterval(addParticleTimeout); // Clear the timeout to prevent new particle creation
 //console.log('Interaction ended');
             // Set a timeout to add a new particle if there's no interaction for 5 seconds
-    interactionTimeout = setTimeout(function addParticle() {
+interactionTimeout = setTimeout(function addParticle() {
         if (particles.length < 240) {
            // Generate a random position outside the viewport
 let x, y;
@@ -318,14 +326,14 @@ switch (side) {
 
 // Create the new particle
 particles.push(new Particle(getRandomRadius(5, 24), x, y));
-           // console.log('Particle created due to inactivity');
+console.log('Particle created due to inactivity');
         }
-        //additonal the gravity center is set to a random location with the canvas
+        // Set the gravitational center to a random location within the canvas
         gravitationalCenter = { x: Math.random() * canvas.width, y: Math.random() * canvas.height };
-        // Set the timeout again to add another particle in 1 second if there's still no interaction
-        interactionTimeout = setTimeout(addParticle, Math.random() * (30000 - 5000) + 5000);
+        // Set the timeout again to add another particle if there's still no interaction
+        addParticleTimeout = setTimeout(addParticle, Math.random() * (30000 - 5000) + 5000);
     }, 15000);
-    }
+}
 
     let lastTap = 0;
 
@@ -368,12 +376,16 @@ particles.push(new Particle(getRandomRadius(5, 24), x, y));
             endInteraction(event);
         }
         lastTap = currentTime;
+        clearInterval(interactionTimeout); // Clear the timeout to prevent new particle creation
+        clearInterval(addParticleTimeout); // Clear the timeout to prevent new particle creation
     });
 
     canvas.addEventListener('dblclick', function(event) {
         const clickX = event.clientX;
         const clickY = event.clientY;
         createOrDeleteParticle(clickX, clickY);
+        clearInterval(interactionTimeout); // Clear the timeout to prevent new particle creation
+        clearInterval(addParticleTimeout); // Clear the timeout to prevent new particle creation
     });
 
 
@@ -395,6 +407,8 @@ canvas.addEventListener('touchcancel', endInteraction);
 
 
 canvas.addEventListener('touchstart', function(event) {
+    clearInterval(interactionTimeout); // Clear the timeout to prevent new particle creation
+        clearInterval(addParticleTimeout); // Clear the timeout to prevent new particle creation
     gravitationalCenter = { x: event.touches[0].clientX, y: event.touches[0].clientY };
 });
 
